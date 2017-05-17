@@ -41,12 +41,25 @@ static int perf_test(perf_runner *runner, std::string const& name, std::size_t N
 
 #define PERF_TEST(FUNCTION, N, PARAM) perf_test(&FUNCTION, #FUNCTION, N, PARAM)
 
+template <typename BitStream>
+struct position_guard {
+    position_guard(BitStream &stream)
+        :_M_stream_ref(stream), _M_pos(stream.tell()) {
+    }
+    ~position_guard() {
+        _M_stream_ref.seek(_M_pos);
+    }
+
+    BitStream &_M_stream_ref;
+    size_t _M_pos;
+};
+
 static int test_output_perf(void *param) {
     using namespace std;
     using namespace org::sqg;
     obitstream &obs = *static_cast<obitstream*>(param);
     try {
-        obs.seek(0, ios::beg);
+        position_guard<obitstream> guard(obs);
         obs.write_bit(1);
         obs.write_bit(0);
         obs.write_intS(1, 5);
@@ -68,7 +81,7 @@ static int test_input_perf(void *param) {
     using namespace org::sqg;
     ibitstream &ibs = *static_cast<ibitstream*>(param);
     try {
-        ibs.seek(0, ios::beg);
+        position_guard<ibitstream> guard(ibs);
         TEST_ASSERT(ibs.read_bit() == 1);
         TEST_ASSERT(ibs.read_bit() == 0);
         TEST_ASSERT(ibs.read_intS(5) == 1);

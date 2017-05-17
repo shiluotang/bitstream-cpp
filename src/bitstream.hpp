@@ -24,7 +24,7 @@ namespace org {
 
                 virtual ~obitstream() { _M_data.reset(); }
             public:
-                obitstream& seek(std::streamoff, std::ios::seekdir);
+                obitstream& seek(std::streamoff, std::ios::seekdir = std::ios::beg);
                 std::streampos tell() const;
 
                 obitstream& write_bit (std::size_t);
