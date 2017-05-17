@@ -8,6 +8,8 @@ struct org::sqg::obitstream::impl {
 
     virtual void seek(std::streamoff, std::ios::seekdir dir) = 0;
 
+    virtual std::streampos tell() const = 0;
+
     virtual void* data() = 0;
 
     virtual void const* data() const = 0;
@@ -112,6 +114,8 @@ namespace {
             }
         }
 
+        virtual std::streampos tell() const { return _M_pos; }
+
         virtual void* data() { return _M_bytes; }
 
         virtual void const* data() const { return _M_bytes; }
@@ -210,6 +214,8 @@ namespace {
                 default: break;
             }
         }
+
+        virtual std::streampos tell() const { return _M_pos; }
 
         virtual void* data() { return &_M_data[0]; }
 
@@ -334,16 +340,13 @@ namespace org {
                     size);
         }
 
-        //obitstream obitstream::own(void *mem, std::size_t size) {
-        //    return obitstream(
-        //            std::shared_ptr<org::sqg::byte>(static_cast<org::sqg::byte*>(mem),
-        //                std::default_delete<org::sqg::byte>()),
-        //            size);
-        //}
-
         obitstream& obitstream::seek(std::streamoff offset, std::ios::seekdir dir) {
             _M_data->seek(offset, dir);
             return *this;
+        }
+
+        std::streampos obitstream::tell() const {
+            return _M_data->tell();
         }
 
         ibitstream::ibitstream(
@@ -433,6 +436,13 @@ namespace org {
         }
 
         std::ostream& operator << (std::ostream &os, ibitstream &ibs) {
+            struct pos_guard {
+                explicit pos_guard(ibitstream &rhs) :_M_ref(rhs), _M_pos(rhs.tell()) { }
+                ~pos_guard() { _M_ref.seek(_M_pos); }
+
+                ibitstream &_M_ref;
+                size_t _M_pos;
+            } guard(ibs);
             try {
                 while (true)
                     os << ibs.read_bit();
@@ -446,12 +456,6 @@ namespace org {
                     std::shared_ptr<byte const>(static_cast<byte const*>(mem), no_delete()),
                     size * 8);
         }
-
-        //ibitstream ibitstream::own(void const* mem, std::size_t size) {
-        //    return ibitstream(
-        //            std::shared_ptr<byte const>(static_cast<byte const*>(mem)),
-        //            size * 8);
-        //}
 
         ibitstream& ibitstream::seek(std::streamoff offset, std::ios::seekdir dir) {
             using namespace std;

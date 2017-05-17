@@ -25,6 +25,8 @@ namespace org {
                 virtual ~obitstream() { _M_data.reset(); }
             public:
                 obitstream& seek(std::streamoff, std::ios::seekdir);
+                std::streampos tell() const;
+
                 obitstream& write_bit (std::size_t);
                 obitstream& write_uint(std::uint64_t, std::size_t);
                 obitstream& write_intS(std::int64_t,  std::size_t);
@@ -60,6 +62,7 @@ namespace org {
                 std::size_t     read_bit();
             public:
                 ibitstream& seek(std::streamoff, std::ios::seekdir = std::ios::beg);
+                std::streampos tell() const { return _M_pos; }
             public:
                 static ibitstream ref(void const*, std::size_t);
                 template <typename T, std::size_t N>
