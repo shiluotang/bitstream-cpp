@@ -34,6 +34,12 @@ namespace org {
 
                 void*       data();
                 void const* data() const;
+
+                /**
+                 * Show how many bits can be written from the beginning.
+                 *
+                 * @return The bits can be written from the beginning.
+                 */
                 std::size_t size() const;
             public:
                 static obitstream ref(void*, std::size_t);
