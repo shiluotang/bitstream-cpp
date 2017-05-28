@@ -140,7 +140,7 @@ namespace {
             uint8_t preserve = 0;
             size_t p = 0;
             while (bits > 0) {
-                if (_M_pos % 8 == 0) {
+                if ((_M_pos & 0x7) == 0) {
                     while (bits >= 8) {
                         bits -= 8;
                         _M_bytes[_M_pos >> 3] = (value >> bits) & 0xff;
@@ -244,7 +244,7 @@ namespace {
             uint8_t preserve = 0;
             size_t p = 0;
             while (bits > 0) {
-                if (_M_pos % 8 == 0) {
+                if ((_M_pos & 0x7) == 0) {
                     while (bits >= 8) {
                         bits -= 8;
                         _M_data[_M_pos >> 3] = (value >> bits) & 0xff;
@@ -467,7 +467,7 @@ namespace org {
                     _M_pos = _M_pos + offset;
                     break;
                 case ios::end:
-                    _M_pos = _M_size * 8 + offset;
+                    _M_pos = _M_size + offset;
                     break;
                 default: break;
             }
